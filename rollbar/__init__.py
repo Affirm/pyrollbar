@@ -359,6 +359,21 @@ def _create_agent_log():
     return retval
 
 
+def _extract_frames(trace):
+    def _squash_decorator_filename(filename):
+        # squash all <decorator*> filenames into <decorator>
+        # so that rollbar can dedupe similar items correctly
+        if filename.startswith("<decorator"):
+            return "<decorator>"
+        else:
+            return filename
+
+    raw_frames = traceback.extract_tb(trace)
+    frames = [{'filename': _squash_decorator_filename(f[0]), 'lineno': f[1], 'method': f[2], 'code': f[3]}
+              for f in raw_frames]
+    return frames
+
+
 def _report_exc_info(exc_info, request, extra_data, payload_data):
     """
     Called by report_exc_info() wrapper
@@ -379,11 +394,9 @@ def _report_exc_info(exc_info, request, extra_data, payload_data):
 
     # exception info
     # most recent call last
-    raw_frames = traceback.extract_tb(trace)
-    frames = [{'filename': f[0], 'lineno': f[1], 'method': f[2], 'code': f[3]} for f in raw_frames]
     data['body'] = {
         'trace': {
-            'frames': frames,
+            'frames': _extract_frames(trace),
             'exception': {
                 'class': cls.__name__,
                 'message': str(exc),
