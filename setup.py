@@ -27,7 +27,8 @@ setup(
         'console_scripts': ['rollbar=rollbar.cli:main']
     },
     description='Easy and powerful exception tracking with Rollbar. Send messages and exceptions with arbitrary context, get back aggregates, and debug production issues quickly.',
-    long_description=README,
+    #long_description=README,
+    long_description='',
     author='Rollbar, Inc.',
     author_email='support@rollbar.com',
     test_suite='rollbar.test',
