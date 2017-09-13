@@ -29,17 +29,31 @@ class RollbarHandler(logging.Handler):
 
     _history = threading.local()
 
+    def _forceArgConversion(self, **kwargs):
+        rv = {}
+        for k in kwargs:
+            v = kwargs[k]
+            if isinstance(v, list):
+                rv[k] = list(v)
+            elif isinstance(v, dict):
+                rv[k] = dict(v)
+            else:
+                rv[k] = v
+
+        return rv
+
     def __init__(self,
                  access_token=None,
                  environment=None,
                  level=logging.INFO,
                  history_size=10,
-                 history_level=logging.DEBUG):
+                 history_level=logging.DEBUG,
+                 **kwargs):
 
         logging.Handler.__init__(self)
 
         if access_token is not None:
-            rollbar.init(access_token, environment)
+            rollbar.init(access_token, environment, **self._forceArgConversion(**kwargs))
 
         self.notify_level = level
 
